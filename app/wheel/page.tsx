@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { getGuests, type Guest } from '@/app/actions/guests'
-import NewWheel from '@/app/components/new-wheel'
+import SuspenseWheel from '@/app/components/suspense-wheel'
 
 export default function WheelPage() {
   const [guests, setGuests] = useState<Guest[]>([])
-  const [spinning, setSpinning] = useState(false)
-  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null)
 
   // Load guests from database on component mount
   useEffect(() => {
@@ -37,55 +34,64 @@ export default function WheelPage() {
     fetchGuests()
   }, [])
 
-  const handleSpin = (guest: Guest | null) => {
-    if (guest === null) {
-      // Start spinning
-      setSpinning(true)
-      setSelectedGuest(null)
-    } else {
-      // Finish spinning with result
-      setSelectedGuest(guest)
-      setSpinning(false)
+  const handleSpinStart = async (): Promise<Guest | null> => {
+    try {
+      const response = await fetch('/api/rigging', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guests })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to select Santa')
+      }
+      
+      const data = await response.json()
+      return data.selectedGuest
+    } catch (error) {
+      console.error('Error selecting Santa:', error)
+      // Fallback to random eligible guest
+      const eligibleGuests = guests.filter(g => g.isEligible)
+      if (eligibleGuests.length === 0) return null
+      return eligibleGuests[Math.floor(Math.random() * eligibleGuests.length)]
     }
   }
 
+  const handleSpinComplete = (guest: Guest) => {
+    console.log('Winner:', guest.name)
+    // Add confetti or other effects here if needed
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
       <section className="container mx-auto px-4 py-8 flex-grow flex flex-col">
-        <div className="max-w-4xl mx-auto flex-grow flex flex-col">
+        <div className="max-w-4xl mx-auto flex-grow flex flex-col w-full">
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-primary to-[oklch(55% 0.1 286)] bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 bg-gradient-to-r from-red-600 to-green-600 bg-clip-text text-transparent drop-shadow-sm">
               Santa Picker Wheel
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               Spin to find this year's Santa!
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 flex-grow">
             {/* Wheel Section - full width */}
-            <div className="flex flex-col">
-              <Card className="flex-grow flex flex-col">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">Santa Wheel</CardTitle>
-                  <CardDescription>
-                    Spin to select this year's Santa
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center flex-grow">
-                  <NewWheel 
+            <div className="flex flex-col items-center w-full">
+              <Card className="w-full bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-none shadow-none">
+                <CardContent className="flex flex-col items-center justify-center p-0 md:p-6">
+                  <SuspenseWheel 
                     guests={guests} 
-                    onSpin={handleSpin} 
-                    spinning={spinning}
-                    selectedGuest={selectedGuest}
+                    onSpinStart={handleSpinStart}
+                    onSpinComplete={handleSpinComplete}
                   />
                 </CardContent>
               </Card>
             </div>
           </div>
 
-          <div className="mt-auto pt-8 text-center">
-            <Button variant="outline" asChild>
+          <div className="mt-auto pt-8 text-center pb-8">
+            <Button variant="outline" asChild className="hover:bg-slate-100">
               <Link href="/admin">Manage Guests</Link>
             </Button>
           </div>
@@ -94,9 +100,3 @@ export default function WheelPage() {
     </div>
   )
 }
-
-
-
-
-
-
