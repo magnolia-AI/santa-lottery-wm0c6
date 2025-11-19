@@ -162,8 +162,8 @@ export default function WheelPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
-                  {/* Wheel Container - made bigger */}
-                  <div className="relative w-80 h-80 md:w-96 md:h-96 mb-8">
+                  {/* Wheel Container - made bigger for more guests */}
+                  <div className="relative w-80 h-80 md:w-[500px] md:h-[500px] mb-8">
                     {/* Wheel */}
                     <div className="relative w-full h-full">
                       <motion.div
@@ -218,7 +218,7 @@ export default function WheelPage() {
                                   }}
                                 >
                                   <span 
-                                    className="text-xs font-bold text-center px-1"
+                                    className="text-xs md:text-sm font-bold text-center px-1"
                                     style={{ 
                                       transform: 'rotate(90deg)',
                                       writingMode: 'vertical-rl',
@@ -241,15 +241,14 @@ export default function WheelPage() {
                         )}
                       </motion.div>
                       
-                      {/* Pointer */}
+                      {/* Pointer - Changed to downward-pointing triangle */}
                       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
                         <div className="w-0 h-0 border-l-8 border-r-8 border-t-16 border-l-transparent border-r-transparent border-t-primary drop-shadow-lg"></div>
-                        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full"></div>
                       </div>
                       
                       {/* Center circle */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-primary to-[oklch(55% 0.1 286)] rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
-                        <span className="text-white font-bold text-sm">SPIN</span>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-primary to-[oklch(55% 0.1 286)] rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
+                        <span className="text-white font-bold text-sm md:text-base">SPIN</span>
                       </div>
                     </div>
                   </div>
@@ -297,6 +296,10 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
+
+
 
 
 
