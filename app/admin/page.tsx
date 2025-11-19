@@ -2,10 +2,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { getGuests, addGuestAction, removeGuestAction, toggleEligibilityAction, clearAllGuestsAction } from '@/app/actions/guests'
+import { ToggleSwitch } from '@/components/toggle-switch'
 
 export default async function AdminPage() {
   const guests = await getGuests()
@@ -90,15 +90,10 @@ export default async function AdminPage() {
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            <form action={toggleEligibilityAction}>
-                              <input type="hidden" name="id" value={guest.id} />
-                              <Switch
-                                checked={guest.isEligible}
-                              />
-                              <button type="submit" className="sr-only">
-                                Toggle eligibility
-                              </button>
-                            </form>
+                            <ToggleSwitch 
+                              id={guest.id} 
+                              isEligible={guest.isEligible} 
+                            />
                             <span className="text-xs w-16">
                               {guest.isEligible ? 'Eligible' : 'Excluded'}
                             </span>
@@ -185,4 +180,8 @@ export default async function AdminPage() {
     </div>
   )
 }
+
+
+
+
 
