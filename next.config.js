@@ -4,7 +4,7 @@ const SourceTaggingPlugin = require('@antonmagnus/next-source-tagging');
 const nextConfig = {
   experimental: {
     serverActions: {
-      allowedOrigins: ['*.fly.dev'],
+      allowedOrigins: ['*.fly.dev', '*.vy.app'],
     },
   },
   output: 'standalone',
