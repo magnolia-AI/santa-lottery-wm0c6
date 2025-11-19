@@ -26,7 +26,8 @@ export async function getGuests(): Promise<Guest[]> {
     }))
   } catch (error) {
     console.error('Error fetching guests:', error)
-    return []
+    // Re-throw the error so the client can handle it properly
+    throw new Error('Failed to fetch guests: ' + (error as Error).message)
   }
 }
 
@@ -197,6 +198,7 @@ export async function clearAllGuestsProgrammatic() {
     throw new Error('Failed to clear guests')
   }
 }
+
 
 
 

@@ -10,9 +10,11 @@ import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getGuests, addGuest, removeGuestById, toggleGuestEligibility, clearAllGuestsProgrammatic } from '@/app/actions/guests'
+import type { Guest } from '@/app/actions/guests'
+// import { testDatabaseConnection } from '@/app/actions/test'
 
 export default function AdminPage() {
-  const [guests, setGuests] = useState([])
+  const [guests, setGuests] = useState<Guest[]>([])
   const [newGuestName, setNewGuestName] = useState('')
   const [newGuestEmail, setNewGuestEmail] = useState('')
   const router = useRouter()
@@ -25,6 +27,7 @@ export default function AdminPage() {
         setGuests(fetchedGuests)
       } catch (error) {
         console.error('Error fetching guests:', error)
+        alert('Failed to load guests: ' + (error as Error).message)
       }
     }
     
@@ -32,7 +35,10 @@ export default function AdminPage() {
   }, [])
 
   const addGuestHandler = async () => {
-    if (!newGuestName.trim()) return
+    if (!newGuestName.trim()) {
+      alert('Please enter a guest name')
+      return
+    }
     
     try {
       const newGuest = await addGuest(newGuestName.trim(), newGuestEmail.trim() || null)
@@ -41,21 +47,21 @@ export default function AdminPage() {
       setNewGuestEmail('')
     } catch (error) {
       console.error('Error adding guest:', error)
-      alert('Failed to add guest')
+      alert('Failed to add guest: ' + (error as Error).message)
     }
   }
 
-  const removeGuest = async (id) => {
+  const removeGuest = async (id: number) => {
     try {
       await removeGuestById(id)
       setGuests(guests.filter(guest => guest.id !== id))
     } catch (error) {
       console.error('Error removing guest:', error)
-      alert('Failed to remove guest')
+      alert('Failed to remove guest: ' + (error as Error).message)
     }
   }
 
-  const toggleEligibility = async (id) => {
+  const toggleEligibility = async (id: number) => {
     try {
       const updatedGuest = await toggleGuestEligibility(id)
       setGuests(guests.map(guest => 
@@ -63,7 +69,7 @@ export default function AdminPage() {
       ))
     } catch (error) {
       console.error('Error toggling eligibility:', error)
-      alert('Failed to toggle eligibility')
+      alert('Failed to toggle eligibility: ' + (error as Error).message)
     }
   }
 
@@ -74,8 +80,20 @@ export default function AdminPage() {
         setGuests([])
       } catch (error) {
         console.error('Error clearing guests:', error)
-        alert('Failed to clear guests')
+        alert('Failed to clear guests: ' + (error as Error).message)
       }
+    }
+  }
+
+  const testDatabaseConnection = async () => {
+    try {
+      // We'll implement this later
+      // const result = await testDatabaseConnection()
+      // alert(`Database test result: ${result.success ? 'Success' : 'Failed - ' + result.error}`)
+      alert('Database connection test functionality would go here')
+    } catch (error) {
+      console.error('Error testing database connection:', error)
+      alert('Failed to test database connection: ' + (error as Error).message)
     }
   }
 
@@ -199,6 +217,12 @@ export default function AdminPage() {
                 >
                   Clear All Guests
                 </Button>
+                <Button 
+                  variant="secondary" 
+                  onClick={testDatabaseConnection}
+                >
+                  Test DB Connection
+                </Button>
               </div>
               
               {guests.length > 0 ? (
@@ -243,6 +267,16 @@ export default function AdminPage() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
