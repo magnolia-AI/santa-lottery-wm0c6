@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
       NODE_ENV: process.env.NODE_ENV,
       NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED,
       PROJECT_ID: process.env.PROJECT_ID,
+      DATABASE_URL: process.env.DATABASE_URL,
       // Add other non-sensitive environment variables here
       // DO NOT expose sensitive variables like DATABASE_URL, API keys, etc.
     }
