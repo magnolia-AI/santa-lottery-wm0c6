@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getGuests } from '@/app/actions/guests'
+import { getGuests, addGuest, removeGuestById, toggleGuestEligibility, clearAllGuestsProgrammatic } from '@/app/actions/guests'
 
 export default function AdminPage() {
   const [guests, setGuests] = useState([])
@@ -21,12 +21,8 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchGuests = async () => {
       try {
-        // For now, we'll keep using localStorage as a fallback
-        // In a real implementation, we would fetch from the database
-        const savedGuests = localStorage.getItem('santaGuests')
-        if (savedGuests) {
-          setGuests(JSON.parse(savedGuests))
-        }
+        const fetchedGuests = await getGuests()
+        setGuests(fetchedGuests)
       } catch (error) {
         console.error('Error fetching guests:', error)
       }
@@ -35,42 +31,51 @@ export default function AdminPage() {
     fetchGuests()
   }, [])
 
-  // Save guests to localStorage whenever they change (for now)
-  useEffect(() => {
-    if (guests.length >= 0) {
-      localStorage.setItem('santaGuests', JSON.stringify(guests))
-    }
-  }, [guests])
-
-  const addGuest = () => {
+  const addGuestHandler = async () => {
     if (!newGuestName.trim()) return
     
-    const newGuest = {
-      id: Date.now(), // Simple ID generation
-      name: newGuestName.trim(),
-      email: newGuestEmail.trim() || null,
-      isEligible: true
+    try {
+      const newGuest = await addGuest(newGuestName.trim(), newGuestEmail.trim() || null)
+      setGuests([...guests, newGuest])
+      setNewGuestName('')
+      setNewGuestEmail('')
+    } catch (error) {
+      console.error('Error adding guest:', error)
+      alert('Failed to add guest')
     }
-    
-    setGuests([...guests, newGuest])
-    setNewGuestName('')
-    setNewGuestEmail('')
   }
 
-  const removeGuest = (id) => {
-    setGuests(guests.filter(guest => guest.id !== id))
+  const removeGuest = async (id) => {
+    try {
+      await removeGuestById(id)
+      setGuests(guests.filter(guest => guest.id !== id))
+    } catch (error) {
+      console.error('Error removing guest:', error)
+      alert('Failed to remove guest')
+    }
   }
 
-  const toggleEligibility = (id) => {
-    setGuests(guests.map(guest => 
-      guest.id === id ? { ...guest, isEligible: !guest.isEligible } : guest
-    ))
+  const toggleEligibility = async (id) => {
+    try {
+      const updatedGuest = await toggleGuestEligibility(id)
+      setGuests(guests.map(guest => 
+        guest.id === id ? updatedGuest : guest
+      ))
+    } catch (error) {
+      console.error('Error toggling eligibility:', error)
+      alert('Failed to toggle eligibility')
+    }
   }
 
-  const clearAllGuests = () => {
+  const clearAllGuests = async () => {
     if (confirm('Are you sure you want to remove all guests?')) {
-      setGuests([])
-      localStorage.removeItem('santaGuests')
+      try {
+        await clearAllGuestsProgrammatic()
+        setGuests([])
+      } catch (error) {
+        console.error('Error clearing guests:', error)
+        alert('Failed to clear guests')
+      }
     }
   }
 
@@ -118,7 +123,7 @@ export default function AdminPage() {
                   />
                 </div>
                 
-                <Button onClick={addGuest} className="w-full" disabled={!newGuestName.trim()}>
+                <Button onClick={addGuestHandler} className="w-full" disabled={!newGuestName.trim()}>
                   Add Guest
                 </Button>
               </CardContent>
@@ -238,4 +243,6 @@ export default function AdminPage() {
     </div>
   )
 }
+
+
 

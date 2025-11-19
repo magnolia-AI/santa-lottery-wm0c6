@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { getGuests } from '@/app/actions/guests'
 
 export default function WheelPage() {
   const [guests, setGuests] = useState([])
@@ -13,31 +14,28 @@ export default function WheelPage() {
   const [selectedGuest, setSelectedGuest] = useState(null)
   const [rotation, setRotation] = useState(0)
 
-  // Load guests from localStorage on component mount
+  // Load guests from database on component mount
   useEffect(() => {
-    const savedGuests = localStorage.getItem('santaGuests')
-    if (savedGuests) {
-      setGuests(JSON.parse(savedGuests))
-    } else {
-      // Initialize with sample guests
-      const sampleGuests = [
-        { id: 1, name: 'Alex Johnson', isEligible: true },
-        { id: 2, name: 'Maria Garcia', isEligible: true },
-        { id: 3, name: 'Sam Wilson', isEligible: true },
-        { id: 4, name: 'Jordan Lee', isEligible: false },
-        { id: 5, name: 'Taylor Kim', isEligible: true },
-      ]
-      setGuests(sampleGuests)
-      localStorage.setItem('santaGuests', JSON.stringify(sampleGuests))
+    const fetchGuests = async () => {
+      try {
+        const fetchedGuests = await getGuests()
+        setGuests(fetchedGuests)
+      } catch (error) {
+        console.error('Error fetching guests:', error)
+        // Fallback to sample guests if database fetch fails
+        const sampleGuests = [
+          { id: 1, name: 'Alex Johnson', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 2, name: 'Maria Garcia', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 3, name: 'Sam Wilson', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 4, name: 'Jordan Lee', isEligible: false, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 5, name: 'Taylor Kim', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+        ]
+        setGuests(sampleGuests)
+      }
     }
+    
+    fetchGuests()
   }, [])
-
-  // Save guests to localStorage whenever they change
-  useEffect(() => {
-    if (guests.length >= 0) {
-      localStorage.setItem('santaGuests', JSON.stringify(guests))
-    }
-  }, [guests])
 
   const spinWheel = async () => {
     if (spinning) return
@@ -270,6 +268,8 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
 
 
 
