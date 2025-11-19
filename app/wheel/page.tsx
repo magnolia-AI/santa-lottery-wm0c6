@@ -24,11 +24,12 @@ export default function WheelPage() {
         console.error('Error fetching guests:', error)
         // Fallback to sample guests if database fetch fails
         const sampleGuests = [
-          { id: 1, name: 'Alex Johnson', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
-          { id: 2, name: 'Maria Garcia', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
-          { id: 3, name: 'Sam Wilson', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
-          { id: 4, name: 'Jordan Lee', isEligible: false, email: null, createdAt: new Date(), updatedAt: new Date() },
-          { id: 5, name: 'Taylor Kim', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 1, name: 'anton', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 2, name: 'Carl', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 3, name: 'Lina', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 4, name: 'Rebecca', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 5, name: 'Sofia', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
+          { id: 6, name: 'Clara Yström', isEligible: true, email: null, createdAt: new Date(), updatedAt: new Date() },
         ]
         setGuests(sampleGuests)
       }
@@ -166,7 +167,7 @@ export default function WheelPage() {
                     {/* Wheel */}
                     <div className="relative w-full h-full">
                       <motion.div
-                        className="w-full h-full rounded-full border-4 border-primary overflow-hidden relative"
+                        className="w-full h-full rounded-full border-8 border-white shadow-xl overflow-hidden relative"
                         animate={{ rotate: rotation }}
                         transition={{ 
                           duration: 3, 
@@ -175,36 +176,49 @@ export default function WheelPage() {
                         style={{ transformOrigin: 'center' }}
                       >
                         {wheelSegments.length > 0 ? (
-                          wheelSegments.map((segment, index) => (
-                            <div
-                              key={segment.id}
-                              className="absolute top-0 right-0 w-1/2 h-1/2 origin-[0%_100%]"
-                              style={{
-                                transform: `rotate(${segment.rotate}deg) skew(${segment.skew}deg)`,
-                                backgroundColor: segment.isEligible 
-                                  ? (index % 2 === 0 ? 'hsl(var(--primary) / 0.2)' : 'hsl(var(--secondary) / 0.2)') 
-                                  : 'hsl(var(--muted) / 0.3)',
-                              }}
-                            >
-                              <div 
-                                className="flex items-center justify-center h-full w-full"
-                                style={{ 
-                                  transform: `skew(-${segment.skew}deg) rotate(-${segment.rotate - segment.segmentAngle/2}deg)`,
-                                  transformOrigin: 'center'
+                          wheelSegments.map((segment, index) => {
+                            // Generate distinct colors for each segment
+                            const hue = (index * 360) / wheelSegments.length;
+                            const backgroundColor = segment.isEligible 
+                              ? `hsl(${hue}, 70%, 40%)` 
+                              : `hsl(${hue}, 30%, 70%)`;
+                            
+                            return (
+                              <div
+                                key={segment.id}
+                                className="absolute top-0 right-0 w-1/2 h-1/2 origin-[0%_100%]"
+                                style={{
+                                  transform: `rotate(${segment.rotate}deg) skew(${segment.skew}deg)`,
+                                  backgroundColor: backgroundColor,
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  boxShadow: segment.isEligible 
+                                    ? 'inset 0 0 10px rgba(255, 255, 255, 0.3)' 
+                                    : 'inset 0 0 5px rgba(255, 255, 255, 0.1)',
                                 }}
                               >
-                                <span 
-                                  className={`text-sm font-medium text-center px-1 ${segment.isEligible ? '' : 'opacity-50'}`}
+                                <div 
+                                  className="flex items-center justify-center h-full w-full"
                                   style={{ 
-                                    transform: 'rotate(90deg)',
-                                    writingMode: 'vertical-rl'
+                                    transform: `skew(-${segment.skew}deg) rotate(-${segment.rotate - segment.segmentAngle/2}deg)`,
+                                    transformOrigin: 'center'
                                   }}
                                 >
-                                  {segment.name}
-                                </span>
+                                  <span 
+                                    className={`text-xs font-bold text-center px-1 ${segment.isEligible ? 'text-white' : 'text-gray-400'}`}
+                                    style={{ 
+                                      transform: 'rotate(90deg)',
+                                      writingMode: 'vertical-rl',
+                                      textShadow: segment.isEligible 
+                                        ? '1px 1px 2px rgba(0, 0, 0, 0.7)' 
+                                        : '1px 1px 1px rgba(0, 0, 0, 0.3)'
+                                    }}
+                                  >
+                                    {segment.name}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted/20">
                             <span className="text-muted-foreground">No eligible guests</span>
@@ -214,12 +228,12 @@ export default function WheelPage() {
                       
                       {/* Pointer */}
                       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                        <div className="w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-primary"></div>
+                        <div className="w-0 h-0 border-l-8 border-r-8 border-t-16 border-l-transparent border-r-transparent border-t-red-500 drop-shadow-lg"></div>
                       </div>
                       
                       {/* Center circle */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-primary rounded-full flex items-center justify-center z-10">
-                        <span className="text-white font-bold">SPIN</span>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
+                        <span className="text-white font-bold text-sm">SPIN</span>
                       </div>
                     </div>
                   </div>
@@ -257,6 +271,10 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
+
+
 
 
 
