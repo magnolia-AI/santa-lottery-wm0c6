@@ -35,6 +35,9 @@ export default function RootLayout({
                   <Button variant="ghost" asChild>
                     <Link href="/admin">Admin</Link>
                   </Button>
+                  <Button variant="ghost" asChild>
+                    <Link href="/env-vars">Env Vars</Link>
+                  </Button>
                 </nav>
               </div>
             </div>
@@ -55,3 +58,4 @@ export default function RootLayout({
     </html>
   )
 }
+
