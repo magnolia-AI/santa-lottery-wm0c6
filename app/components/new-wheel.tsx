@@ -101,7 +101,7 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
   }
 
   return (
-    <div className="flex flex-col items-center justify-center flex-grow w-full py-8">
+    <div className="flex flex-col items-center justify-center flex-grow w-full">
       {/* Wheel Container */}
       <div 
         ref={containerRef}
