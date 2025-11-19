@@ -117,7 +117,7 @@ export default function WheelPage() {
     ))
   }
 
-  // Create wheel segments
+  // Create wheel segments with improved color scheme
   const createWheelSegments = () => {
     // Display all guests on the wheel for presentation purposes
     // but visually indicate eligibility status
@@ -143,7 +143,7 @@ export default function WheelPage() {
       <section className="container mx-auto px-4 pt-12 pb-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-primary to-[oklch(55% 0.1 286)] bg-clip-text text-transparent">
               Santa Picker Wheel
             </h1>
             <p className="text-muted-foreground">
@@ -155,8 +155,8 @@ export default function WheelPage() {
             {/* Wheel Section - full width */}
             <div>
               <Card className="h-full">
-                <CardHeader>
-                  <CardTitle>Santa Wheel</CardTitle>
+                <CardHeader className="text-center">
+                  <CardTitle className="text-2xl">Santa Wheel</CardTitle>
                   <CardDescription>
                     Spin to select this year's Santa
                   </CardDescription>
@@ -177,11 +177,25 @@ export default function WheelPage() {
                       >
                         {wheelSegments.length > 0 ? (
                           wheelSegments.map((segment, index) => {
-                            // Generate distinct colors for each segment
-                            const hue = (index * 360) / wheelSegments.length;
-                            const backgroundColor = segment.isEligible 
-                              ? `hsl(${hue}, 70%, 40%)` 
-                              : `hsl(${hue}, 30%, 70%)`;
+                            // Generate a more harmonious color palette using the theme colors
+                            // Calculate a position in a smooth gradient around the wheel
+                            const position = index / wheelSegments.length;
+                            
+                            // Use theme-appropriate colors with better harmony
+                            let backgroundColor, textColor, borderColor;
+                            
+                            if (segment.isEligible) {
+                              // For eligible guests, use vibrant colors from our theme
+                              const hue = position * 360;
+                              backgroundColor = `oklch(65% 0.15 ${hue})`;
+                              textColor = 'white';
+                              borderColor = 'rgba(255, 255, 255, 0.4)';
+                            } else {
+                              // For ineligible guests, use muted colors
+                              backgroundColor = 'oklch(85% 0.05 286)'; // Light gray from theme
+                              textColor = 'oklch(55% 0.05 286)'; // Muted text from theme
+                              borderColor = 'rgba(0, 0, 0, 0.05)';
+                            }
                             
                             return (
                               <div
@@ -190,10 +204,10 @@ export default function WheelPage() {
                                 style={{
                                   transform: `rotate(${segment.rotate}deg) skew(${segment.skew}deg)`,
                                   backgroundColor: backgroundColor,
-                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  border: `1px solid ${borderColor}`,
                                   boxShadow: segment.isEligible 
-                                    ? 'inset 0 0 10px rgba(255, 255, 255, 0.3)' 
-                                    : 'inset 0 0 5px rgba(255, 255, 255, 0.1)',
+                                    ? 'inset 0 0 15px rgba(255, 255, 255, 0.5)' 
+                                    : 'inset 0 0 5px rgba(0, 0, 0, 0.05)',
                                 }}
                               >
                                 <div 
@@ -204,13 +218,14 @@ export default function WheelPage() {
                                   }}
                                 >
                                   <span 
-                                    className={`text-xs font-bold text-center px-1 ${segment.isEligible ? 'text-white' : 'text-gray-400'}`}
+                                    className="text-xs font-bold text-center px-1"
                                     style={{ 
                                       transform: 'rotate(90deg)',
                                       writingMode: 'vertical-rl',
+                                      color: textColor,
                                       textShadow: segment.isEligible 
-                                        ? '1px 1px 2px rgba(0, 0, 0, 0.7)' 
-                                        : '1px 1px 1px rgba(0, 0, 0, 0.3)'
+                                        ? '1px 1px 2px rgba(0, 0, 0, 0.5)' 
+                                        : '1px 1px 1px rgba(0, 0, 0, 0.1)'
                                     }}
                                   >
                                     {segment.name}
@@ -228,11 +243,12 @@ export default function WheelPage() {
                       
                       {/* Pointer */}
                       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                        <div className="w-0 h-0 border-l-8 border-r-8 border-t-16 border-l-transparent border-r-transparent border-t-red-500 drop-shadow-lg"></div>
+                        <div className="w-0 h-0 border-l-8 border-r-8 border-t-16 border-l-transparent border-r-transparent border-t-primary drop-shadow-lg"></div>
+                        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full"></div>
                       </div>
                       
                       {/* Center circle */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-primary to-[oklch(55% 0.1 286)] rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
                         <span className="text-white font-bold text-sm">SPIN</span>
                       </div>
                     </div>
@@ -241,19 +257,29 @@ export default function WheelPage() {
                   <Button 
                     onClick={spinWheel} 
                     disabled={spinning || wheelSegments.length === 0}
-                    className="w-full max-w-xs"
+                    className="w-full max-w-xs bg-gradient-to-r from-primary to-[oklch(55% 0.1 286)] hover:from-primary/90 hover:to-[oklch(50% 0.1 286)] text-white"
                     size="lg"
                   >
-                    {spinning ? 'Spinning...' : 'Spin the Wheel'}
+                    {spinning ? (
+                      <span className="flex items-center">
+                        <span className="animate-spin mr-2">🎄</span>
+                        Spinning...
+                      </span>
+                    ) : 'Spin the Wheel'}
                   </Button>
 
                   {selectedGuest && (
-                    <div className="mt-6 text-center p-4 bg-primary/10 rounded-lg w-full">
+                    <div className="mt-6 text-center p-6 bg-gradient-to-r from-primary/10 to-[oklch(55% 0.1 286)/0.1] rounded-xl border border-primary/20 w-full">
                       <h3 className="text-xl font-bold">🎉 This Year's Santa 🎉</h3>
-                      <p className="text-2xl font-bold text-primary mt-2">{selectedGuest.name}</p>
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-3xl font-bold text-primary mt-3 mb-2">{selectedGuest.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         Congratulations! You get free drinks at the bar.
                       </p>
+                      <div className="mt-4 flex justify-center">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-2xl">🎅</span>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -271,6 +297,21 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
