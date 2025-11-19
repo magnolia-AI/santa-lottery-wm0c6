@@ -12,7 +12,6 @@ export default function WheelPage() {
   const [spinning, setSpinning] = useState(false)
   const [selectedGuest, setSelectedGuest] = useState(null)
   const [rotation, setRotation] = useState(0)
-  const [isAdmin, setIsAdmin] = useState(false)
 
   // Load guests from localStorage on component mount
   useEffect(() => {
@@ -91,13 +90,9 @@ export default function WheelPage() {
     }
   }
 
-  const toggleAdminMode = () => {
-    setIsAdmin(!isAdmin)
-  }
-
   const toggleEligibility = (id) => {
-    if (!isAdmin) return
-    
+    // This function is only for admin panel now
+    // Keeping it for type safety but it won't be used on this page
     setGuests(guests.map(guest => 
       guest.id === id ? { ...guest, isEligible: !guest.isEligible } : guest
     ))
@@ -105,11 +100,12 @@ export default function WheelPage() {
 
   // Create wheel segments
   const createWheelSegments = () => {
-    const eligibleGuests = guests.filter(guest => guest.isEligible)
-    if (eligibleGuests.length === 0) return []
+    // Display all guests on the wheel for presentation purposes
+    // but visually indicate eligibility status
+    if (guests.length === 0) return []
     
-    const segmentAngle = 360 / eligibleGuests.length
-    return eligibleGuests.map((guest, index) => {
+    const segmentAngle = 360 / guests.length
+    return guests.map((guest, index) => {
       const rotate = index * segmentAngle
       const skew = 90 - segmentAngle
       return {
@@ -141,20 +137,9 @@ export default function WheelPage() {
             <div className="lg:col-span-2">
               <Card className="h-full">
                 <CardHeader>
-                  <CardTitle className="flex justify-between items-center">
-                    <span>Santa Wheel</span>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={toggleAdminMode}
-                    >
-                      {isAdmin ? 'Exit Admin' : 'Admin Mode'}
-                    </Button>
-                  </CardTitle>
+                  <CardTitle>Santa Wheel</CardTitle>
                   <CardDescription>
-                    {isAdmin 
-                      ? 'Click on guests in the list to toggle eligibility' 
-                      : 'Spin to select this year\'s Santa'}
+                    Spin to select this year's Santa
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
@@ -178,7 +163,9 @@ export default function WheelPage() {
                               className="absolute top-0 right-0 w-1/2 h-1/2 origin-[0%_100%]"
                               style={{
                                 transform: `rotate(${segment.rotate}deg) skew(${segment.skew}deg)`,
-                                backgroundColor: index % 2 === 0 ? 'hsl(var(--primary) / 0.2)' : 'hsl(var(--secondary) / 0.2)',
+                                backgroundColor: segment.isEligible 
+                                  ? (index % 2 === 0 ? 'hsl(var(--primary) / 0.2)' : 'hsl(var(--secondary) / 0.2)') 
+                                  : 'hsl(var(--muted) / 0.3)',
                               }}
                             >
                               <div 
@@ -189,7 +176,7 @@ export default function WheelPage() {
                                 }}
                               >
                                 <span 
-                                  className="text-xs font-medium text-center px-1"
+                                  className={`text-xs font-medium text-center px-1 ${segment.isEligible ? '' : 'opacity-50'}`}
                                   style={{ 
                                     transform: 'rotate(90deg)',
                                     writingMode: 'vertical-rl'
@@ -246,9 +233,7 @@ export default function WheelPage() {
               <CardHeader>
                 <CardTitle>Party Guests</CardTitle>
                 <CardDescription>
-                  {isAdmin 
-                    ? 'Click on guests to toggle eligibility' 
-                    : 'Eligible guests can be selected as Santa'}
+                  All guests in this year's Christmas party
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -256,28 +241,9 @@ export default function WheelPage() {
                   {guests.map((guest) => (
                     <div 
                       key={guest.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border ${
-                        isAdmin && guest.isEligible 
-                          ? 'border-primary bg-primary/5 cursor-pointer' 
-                          : isAdmin 
-                            ? 'border-muted bg-muted/50 cursor-pointer opacity-70' 
-                            : guest.isEligible 
-                              ? 'border border-input' 
-                              : 'border border-input opacity-50'
-                      }`}
-                      onClick={() => isAdmin && toggleEligibility(guest.id)}
+                      className="flex items-center justify-between p-3 rounded-lg border border-input"
                     >
                       <span className="font-medium">{guest.name}</span>
-                      <div className="flex items-center gap-2">
-                        {isAdmin && (
-                          <Badge variant={guest.isEligible ? "default" : "secondary"}>
-                            {guest.isEligible ? "Eligible" : "Not Eligible"}
-                          </Badge>
-                        )}
-                        {!isAdmin && guest.isEligible && (
-                          <Badge variant="default">Eligible</Badge>
-                        )}
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -288,15 +254,6 @@ export default function WheelPage() {
                     <Button variant="link" asChild className="p-0 mt-2">
                       <Link href="/admin">Add guests in admin panel</Link>
                     </Button>
-                  </div>
-                )}
-                
-                {isAdmin && (
-                  <div className="mt-6 p-4 bg-secondary/20 rounded-lg">
-                    <h4 className="font-medium mb-2">Admin Instructions</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Click on guests to toggle their eligibility. Only eligible guests can be selected as Santa.
-                    </p>
                   </div>
                 )}
               </CardContent>
@@ -313,3 +270,10 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
+
+
+
+
+
