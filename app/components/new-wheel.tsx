@@ -15,12 +15,10 @@ interface NewWheelProps {
 }
 
 export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: NewWheelProps) {
-  const [rotation, setRotation] = useState(0)
   const [visibleGuests, setVisibleGuests] = useState<Guest[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const radius = 200 // Radius of the wheel
-  const rotationRef = useRef(0)
-  const targetRotationRef = useRef(0)
+  const wheelRotation = useMotionValue(0)
 
   // Filter eligible guests
   const eligibleGuests = guests.filter(guest => guest.isEligible)
@@ -33,15 +31,15 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
   // Handle spinning animation
   useEffect(() => {
     if (spinning) {
-      // Continue spinning while waiting for result
-      const spinAnimation = setInterval(() => {
-        setRotation(prev => prev + 10)
-        rotationRef.current += 10
-      }, 50)
+      // Animate the wheel rotation
+      const rotationAnimation = animate(wheelRotation, wheelRotation.get() + 3600, {
+        duration: 5,
+        ease: "easeOut"
+      })
       
-      return () => clearInterval(spinAnimation)
+      return () => rotationAnimation.stop()
     }
-  }, [spinning])
+  }, [spinning, wheelRotation])
 
   const handleSpin = async () => {
     if (spinning || eligibleGuests.length === 0) return
@@ -87,7 +85,10 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
         className="relative w-80 h-80 md:w-[500px] md:h-[500px] mb-8"
       >
         {/* Wheel Visualization */}
-        <div className="relative w-full h-full rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-[oklch(55% 0.1 286)/0.05] flex items-center justify-center">
+        <motion.div 
+          className="relative w-full h-full rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-[oklch(55% 0.1 286)/0.05] flex items-center justify-center"
+          style={{ rotate: wheelRotation }}
+        >
           {/* Center circle */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-primary to-[oklch(55% 0.1 286)] rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
             <span className="text-white font-bold text-xs md:text-sm">SPIN</span>
@@ -127,7 +128,7 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
                 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                <span className="font-bold text-xs md:text-sm truncate px-1">
+                <span className="font-bold text-xs md:text-sm flex items-center justify-center w-full h-full">
                   {guest.name.charAt(0)}
                 </span>
                 {isSelected && (
@@ -145,7 +146,7 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
               </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
 
       {/* Spin Button */}
@@ -197,5 +198,9 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
     </div>
   )
 }
+
+
+
+
 
 
