@@ -1,58 +1,70 @@
-# Next.js Template Project
+# Christmas Party Santa Picker
 
-This is a versatile template for building web applications with Next.js and Tailwind CSS. It includes a responsive layout, theme switching, and various UI components to help you get started quickly.
+A fun web application for hosting a Christmas party where guests spin a wheel to determine who will be "Santa" and get free drinks at the bar!
 
 ## Features
 
-- 🎨 Responsive layout with header and footer
-- 🌓 Dark/light mode with theme switching
-- 📱 Mobile-friendly navigation
-- 🧩 Pre-built UI components
-- 🚀 Performance optimized
-- 🔍 SEO-friendly structure
+- 🎡 Interactive spinning wheel to select this year's Santa
+- 👤 Admin panel to manage party guests
+- 🎯 Rigging controls to determine who can be selected
+- 🎉 Festive UI with Christmas theme
+- 💾 Local storage for data persistence
+- 📱 Responsive design for all devices
+
+## How It Works
+
+1. **Add Guests**: Use the admin panel to add all party guests
+2. **Set Eligibility**: Toggle which guests are eligible to be Santa
+3. **Spin the Wheel**: Click the spin button to randomly select a Santa
+4. **Celebrate**: The selected Santa gets free drinks at the bar!
+
+## Pages
+
+- **Home** (`/`): Welcome page with instructions
+- **Wheel** (`/wheel`): The main wheel spinning interface
+- **Admin** (`/admin`): Manage guests and rigging settings
+
+## Rigging Functionality
+
+The app includes "rigging" functionality that allows you to control who can be selected as Santa:
+
+1. In the admin panel, toggle the eligibility switch for each guest
+2. Only guests marked as "Eligible" can be selected by the wheel
+3. This creates the appearance of a fair selection while allowing you to control the outcome
+
+## Technical Details
+
+- Built with Next.js 15 App Router
+- Uses Tailwind CSS and Shadcn UI components
+- Client-side data storage with localStorage
+- Framer Motion for animations
+- Fully responsive design
 
 ## Getting Started
 
-1. Clone this repository or use it as a template
-2. Install dependencies:
+1. Install dependencies:
    ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
+   bun install
    ```
-3. Run the development server:
+
+2. Run the development server:
    ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
+   bun run dev
    ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Customization
-
-This template is designed to be fully customizable:
-
-- **Styling**: Modify the theme in `app/globals.css`
-- **Layout**: Edit the layout structure in `app/layout.tsx`
-- **Content**: Replace placeholder content in `app/page.tsx`
-- **Components**: Add or modify components in the `components` directory
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Deployment
 
-Deploy your customized template using Vercel, Netlify, or any other hosting service that supports Next.js.
+This app can be deployed to any platform that supports Next.js, such as Vercel, Netlify, or Cloudflare Pages.
 
-## Learn More
+## Customization
 
-To learn more about the technologies used in this template:
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [shadcn/ui Components](https://ui.shadcn.com)
+- **Styling**: Modify the theme in `app/globals.css`
+- **Components**: Add or modify components in the `components` directory
+- **Pages**: Edit page content in the `app` directory
 
 ## License
 
-This template is MIT licensed.
+This project is MIT licensed.
+
