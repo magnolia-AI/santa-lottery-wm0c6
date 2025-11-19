@@ -1,101 +1,14 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getGuests, addGuest, removeGuestById, toggleGuestEligibility, clearAllGuestsProgrammatic } from '@/app/actions/guests'
-import type { Guest } from '@/app/actions/guests'
-// import { testDatabaseConnection } from '@/app/actions/test'
+import { getGuests, addGuestAction, removeGuestAction, toggleEligibilityAction, clearAllGuestsAction } from '@/app/actions/guests'
 
-export default function AdminPage() {
-  const [guests, setGuests] = useState<Guest[]>([])
-  const [newGuestName, setNewGuestName] = useState('')
-  const [newGuestEmail, setNewGuestEmail] = useState('')
-  const router = useRouter()
-
-  // Load guests from database on component mount
-  useEffect(() => {
-    const fetchGuests = async () => {
-      try {
-        const fetchedGuests = await getGuests()
-        setGuests(fetchedGuests)
-      } catch (error) {
-        console.error('Error fetching guests:', error)
-        alert('Failed to load guests: ' + (error as Error).message)
-      }
-    }
-    
-    fetchGuests()
-  }, [])
-
-  const addGuestHandler = async () => {
-    if (!newGuestName.trim()) {
-      alert('Please enter a guest name')
-      return
-    }
-    
-    try {
-      const newGuest = await addGuest(newGuestName.trim(), newGuestEmail.trim() || null)
-      setGuests([...guests, newGuest])
-      setNewGuestName('')
-      setNewGuestEmail('')
-    } catch (error) {
-      console.error('Error adding guest:', error)
-      alert('Failed to add guest: ' + (error as Error).message)
-    }
-  }
-
-  const removeGuest = async (id: number) => {
-    try {
-      await removeGuestById(id)
-      setGuests(guests.filter(guest => guest.id !== id))
-    } catch (error) {
-      console.error('Error removing guest:', error)
-      alert('Failed to remove guest: ' + (error as Error).message)
-    }
-  }
-
-  const toggleEligibility = async (id: number) => {
-    try {
-      const updatedGuest = await toggleGuestEligibility(id)
-      setGuests(guests.map(guest => 
-        guest.id === id ? updatedGuest : guest
-      ))
-    } catch (error) {
-      console.error('Error toggling eligibility:', error)
-      alert('Failed to toggle eligibility: ' + (error as Error).message)
-    }
-  }
-
-  const clearAllGuests = async () => {
-    if (confirm('Are you sure you want to remove all guests?')) {
-      try {
-        await clearAllGuestsProgrammatic()
-        setGuests([])
-      } catch (error) {
-        console.error('Error clearing guests:', error)
-        alert('Failed to clear guests: ' + (error as Error).message)
-      }
-    }
-  }
-
-  const testDatabaseConnection = async () => {
-    try {
-      // We'll implement this later
-      // const result = await testDatabaseConnection()
-      // alert(`Database test result: ${result.success ? 'Success' : 'Failed - ' + result.error}`)
-      alert('Database connection test functionality would go here')
-    } catch (error) {
-      console.error('Error testing database connection:', error)
-      alert('Failed to test database connection: ' + (error as Error).message)
-    }
-  }
+export default async function AdminPage() {
+  const guests = await getGuests()
 
   return (
     <div className="min-h-full">
@@ -120,30 +33,31 @@ export default function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={newGuestName}
-                    onChange={(e) => setNewGuestName(e.target.value)}
-                    placeholder="Enter guest name"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email (Optional)</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newGuestEmail}
-                    onChange={(e) => setNewGuestEmail(e.target.value)}
-                    placeholder="Enter guest email"
-                  />
-                </div>
-                
-                <Button onClick={addGuestHandler} className="w-full" disabled={!newGuestName.trim()}>
-                  Add Guest
-                </Button>
+                <form action={addGuestAction} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name *</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="Enter guest name"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email (Optional)</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter guest email"
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    Add Guest
+                  </Button>
+                </form>
               </CardContent>
             </Card>
 
@@ -176,10 +90,15 @@ export default function AdminPage() {
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            <Switch
-                              checked={guest.isEligible}
-                              onCheckedChange={() => toggleEligibility(guest.id)}
-                            />
+                            <form action={toggleEligibilityAction}>
+                              <input type="hidden" name="id" value={guest.id} />
+                              <Switch
+                                checked={guest.isEligible}
+                              />
+                              <button type="submit" className="sr-only">
+                                Toggle eligibility
+                              </button>
+                            </form>
                             <span className="text-xs w-16">
                               {guest.isEligible ? 'Eligible' : 'Excluded'}
                             </span>
@@ -210,19 +129,15 @@ export default function AdminPage() {
                 <Button variant="outline" asChild>
                   <Link href="/wheel">Back to Wheel</Link>
                 </Button>
-                <Button 
-                  variant="destructive" 
-                  onClick={clearAllGuests}
-                  disabled={guests.length === 0}
-                >
-                  Clear All Guests
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  onClick={testDatabaseConnection}
-                >
-                  Test DB Connection
-                </Button>
+                <form action={clearAllGuestsAction}>
+                  <Button 
+                    variant="destructive" 
+                    type="submit"
+                    disabled={guests.length === 0}
+                  >
+                    Clear All Guests
+                  </Button>
+                </form>
               </div>
               
               {guests.length > 0 ? (
@@ -243,13 +158,16 @@ export default function AdminPage() {
                         <Badge variant={guest.isEligible ? "default" : "secondary"}>
                           {guest.isEligible ? "Eligible" : "Not Eligible"}
                         </Badge>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => removeGuest(guest.id)}
-                        >
-                          Remove
-                        </Button>
+                        <form action={removeGuestAction}>
+                          <input type="hidden" name="id" value={guest.id} />
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            type="submit"
+                          >
+                            Remove
+                          </Button>
+                        </form>
                       </div>
                     </div>
                   ))}
@@ -267,16 +185,4 @@ export default function AdminPage() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
