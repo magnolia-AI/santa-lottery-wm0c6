@@ -49,39 +49,59 @@ export default function WheelPage() {
     setSpinning(true)
     setSelectedGuest(null)
     
-    // Calculate random rotation (5-10 full rotations + random offset)
-    const fullRotations = 5 + Math.floor(Math.random() * 5)
-    const randomAngle = Math.floor(Math.random() * 360)
-    const totalRotation = fullRotations * 360 + randomAngle
-    
-    // Add to current rotation for continuous spinning effect
-    const newRotation = rotation + totalRotation
-    setRotation(newRotation)
-    
     // Determine the selected guest using our API
     try {
-      // In a real implementation with a database, we would call our API
-      // For now, we'll simulate the API call
-      setTimeout(async () => {
-        // Simulate API call delay
-        // const response = await fetch('/api/rigging', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ guests })
-        // })
-        // const { selectedGuest } = await response.json()
-        
-        // For demo purposes, we'll just select a random eligible guest
-        const selectedIndex = Math.floor(Math.random() * eligibleGuests.length)
-        const winner = eligibleGuests[selectedIndex]
-        setSelectedGuest(winner)
+      const response = await fetch('/api/rigging', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guests })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to select Santa')
+      }
+      
+      const { selectedGuest } = await response.json()
+      
+      // Calculate rotation to land on the selected guest
+      const selectedIndex = guests.findIndex(guest => guest.id === selectedGuest.id)
+      if (selectedIndex === -1) {
+        throw new Error('Selected guest not found in guest list')
+      }
+      
+      // Calculate the angle for the selected segment
+      const segmentAngle = 360 / guests.length
+      const targetAngle = selectedIndex * segmentAngle
+      
+      // Calculate rotation to land on the selected segment (5-10 full rotations + precise landing)
+      const fullRotations = 5 + Math.floor(Math.random() * 5)
+      const totalRotation = fullRotations * 360 + (360 - targetAngle) - (segmentAngle / 2)
+      
+      // Add to current rotation for continuous spinning effect
+      const newRotation = rotation + totalRotation
+      setRotation(newRotation)
+      
+      // Set the winner after the animation completes
+      setTimeout(() => {
+        setSelectedGuest(selectedGuest)
         setSpinning(false)
       }, 3000)
     } catch (error) {
+      console.error('Error selecting Santa:', error)
       // Fallback to random selection if API fails
+      const selectedIndex = Math.floor(Math.random() * eligibleGuests.length)
+      const winner = eligibleGuests[selectedIndex]
+      
+      // Calculate rotation to land on the selected guest
+      const guestIndex = guests.findIndex(guest => guest.id === winner.id)
+      const segmentAngle = 360 / guests.length
+      const targetAngle = guestIndex * segmentAngle
+      const fullRotations = 5 + Math.floor(Math.random() * 5)
+      const totalRotation = fullRotations * 360 + (360 - targetAngle) - (segmentAngle / 2)
+      const newRotation = rotation + totalRotation
+      setRotation(newRotation)
+      
       setTimeout(() => {
-        const selectedIndex = Math.floor(Math.random() * eligibleGuests.length)
-        const winner = eligibleGuests[selectedIndex]
         setSelectedGuest(winner)
         setSpinning(false)
       }, 3000)
@@ -268,6 +288,8 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
 
 
 
