@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { Guest } from '@/app/actions/guests'
+import { useSoundEffect } from '@/app/components/use-sound-effect'
 
 interface NewWheelProps {
   guests: Guest[]
@@ -19,6 +20,7 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
   const containerRef = useRef<HTMLDivElement>(null)
   const radius = 200 // Radius of the wheel
   const wheelRotation = useMotionValue(0)
+  const { initAudioContext, playSpinSound, playWinSound } = useSoundEffect()
 
   // Filter eligible guests
   const eligibleGuests = guests.filter(guest => guest.isEligible)
@@ -31,10 +33,15 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
   // Handle spinning animation
   useEffect(() => {
     if (spinning) {
-      // Animate the wheel rotation
-      const rotationAnimation = animate(wheelRotation, wheelRotation.get() + 3600, {
-        duration: 5,
-        ease: "easeOut"
+      // Create a more suspenseful spinning animation
+      // Start with a fast spin, then slow down dramatically
+      const initialRotation = wheelRotation.get()
+      const targetRotation = initialRotation + 3600 + Math.random() * 360 // Add some randomness
+      
+      // Animate with a custom easing for more realistic spin
+      const rotationAnimation = animate(wheelRotation, targetRotation, {
+        duration: 6, // Longer duration for more suspense
+        ease: [0.2, 0.8, 0.3, 1.0] // Custom easing for more natural feel
       })
       
       return () => rotationAnimation.stop()
@@ -43,6 +50,12 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
 
   const handleSpin = async () => {
     if (spinning || eligibleGuests.length === 0) return
+    
+    // Initialize audio context on user interaction
+    initAudioContext()
+    
+    // Play spin sound
+    playSpinSound()
     
     // Start spinning animation
     onSpin(null) // Reset selected guest
@@ -59,13 +72,23 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
       }
       
       const { selectedGuest } = await response.json()
-      onSpin(selectedGuest)
+      
+      // Add suspense by delaying the reveal
+      setTimeout(() => {
+        playWinSound() // Play win sound when revealing winner
+        onSpin(selectedGuest)
+      }, 2000) // 2 second delay for suspense
     } catch (error) {
       console.error('Error selecting Santa:', error)
       // Fallback to random selection if API fails
       const selectedIndex = Math.floor(Math.random() * eligibleGuests.length)
       const winner = eligibleGuests[selectedIndex]
-      onSpin(winner)
+      
+      // Add suspense even for fallback
+      setTimeout(() => {
+        playWinSound() // Play win sound when revealing winner
+        onSpin(winner)
+      }, 2000) // 2 second delay for suspense
     }
   }
 
@@ -78,25 +101,31 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center justify-center flex-grow w-full py-8">
       {/* Wheel Container */}
       <div 
         ref={containerRef}
-        className="relative w-80 h-80 md:w-[500px] md:h-[500px] mb-8"
+        className="relative w-80 h-80 md:w-[500px] md:h-[500px] mb-8 flex items-center justify-center"
       >
         {/* Wheel Visualization */}
         <motion.div 
-          className="relative w-full h-full rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-[oklch(55% 0.1 286)/0.05] flex items-center justify-center"
+          className="relative w-full h-full rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-[oklch(55% 0.1 286)/0.05] flex items-center justify-center shadow-xl"
           style={{ rotate: wheelRotation }}
+          animate={spinning ? { scale: 1.02 } : { scale: 1 }}
+          transition={{ duration: 0.3 }}
         >
           {/* Center circle */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-primary to-[oklch(55% 0.1 286)] rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-primary to-[oklch(55% 0.1 286)] rounded-full flex items-center justify-center z-10 shadow-lg border-4 border-white animate-pulse">
             <span className="text-white font-bold text-xs md:text-sm">SPIN</span>
           </div>
           
           {/* Pointer */}
           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-            <div className="w-0 h-0 border-l-6 border-r-6 border-t-12 border-l-transparent border-r-transparent border-t-primary drop-shadow-lg"></div>
+            <div 
+              className={`w-0 h-0 border-l-6 border-r-6 border-t-12 border-l-transparent border-r-transparent border-t-primary drop-shadow-lg ${
+                spinning ? 'animate-bounce' : ''
+              }`}
+            ></div>
           </div>
           
           {/* Guest Items */}
@@ -121,12 +150,19 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
                   zIndex: isSelected ? 20 : 10
                 }}
                 animate={{
-                  scale: isSelected ? 1.2 : 1,
+                  scale: spinning ? [1, 1.1, 1] : isSelected ? 1.2 : 1,
                   boxShadow: isSelected 
                     ? '0 10px 25px rgba(0, 0, 0, 0.2)' 
-                    : '0 2px 5px rgba(0, 0, 0, 0.1)'
+                    : spinning 
+                      ? '0 4px 10px rgba(0, 0, 0, 0.15)' 
+                      : '0 2px 5px rgba(0, 0, 0, 0.1)'
                 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 300, 
+                  damping: 20,
+                  scale: { repeat: spinning ? Infinity : 0, duration: spinning ? 0.5 : 0.2 }
+                }}
               >
                 <span className="font-bold text-xs md:text-sm flex items-center justify-center w-full h-full">
                   {guest.name.charAt(0)}
@@ -168,6 +204,15 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
         )}
       </Button>
 
+      {/* Spinning indicator */}
+      {spinning && (
+        <div className="mt-4 text-center">
+          <p className="text-muted-foreground animate-pulse">
+            The wheel is spinning... Who will be Santa? 🎁
+          </p>
+        </div>
+      )}
+
       {/* Guest Counter */}
       <div className="mt-4 text-center">
         <Badge variant="secondary">
@@ -198,6 +243,17 @@ export default function NewWheel({ guests, onSpin, spinning, selectedGuest }: Ne
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
