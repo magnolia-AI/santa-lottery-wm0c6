@@ -150,9 +150,9 @@ export default function WheelPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Wheel Section - spans 2 columns on large screens */}
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-8">
+            {/* Wheel Section - full width */}
+            <div>
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle>Santa Wheel</CardTitle>
@@ -161,8 +161,8 @@ export default function WheelPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
-                  {/* Wheel Container */}
-                  <div className="relative w-64 h-64 md:w-80 md:h-80 mb-8">
+                  {/* Wheel Container - made bigger */}
+                  <div className="relative w-80 h-80 md:w-96 md:h-96 mb-8">
                     {/* Wheel */}
                     <div className="relative w-full h-full">
                       <motion.div
@@ -194,13 +194,13 @@ export default function WheelPage() {
                                 }}
                               >
                                 <span 
-                                  className={`text-xs font-medium text-center px-1 ${segment.isEligible ? '' : 'opacity-50'}`}
+                                  className={`text-sm font-medium text-center px-1 ${segment.isEligible ? '' : 'opacity-50'}`}
                                   style={{ 
                                     transform: 'rotate(90deg)',
                                     writingMode: 'vertical-rl'
                                   }}
                                 >
-                                  {segment.name.split(' ')[0]}
+                                  {segment.name}
                                 </span>
                               </div>
                             </div>
@@ -218,8 +218,8 @@ export default function WheelPage() {
                       </div>
                       
                       {/* Center circle */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-primary rounded-full flex items-center justify-center z-10">
-                        <span className="text-white font-bold text-xs">SPIN</span>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-primary rounded-full flex items-center justify-center z-10">
+                        <span className="text-white font-bold">SPIN</span>
                       </div>
                     </div>
                   </div>
@@ -245,37 +245,6 @@ export default function WheelPage() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Guest List Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Party Guests</CardTitle>
-                <CardDescription>
-                  All guests in this year's Christmas party
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                  {guests.map((guest) => (
-                    <div 
-                      key={guest.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-input"
-                    >
-                      <span className="font-medium">{guest.name}</span>
-                    </div>
-                  ))}
-                </div>
-                
-                {guests.length === 0 && (
-                  <div className="text-center py-4 text-muted-foreground">
-                    <p>No guests added yet.</p>
-                    <Button variant="link" asChild className="p-0 mt-2">
-                      <Link href="/admin">Add guests in admin panel</Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
           <div className="mt-8 text-center">
@@ -288,6 +257,11 @@ export default function WheelPage() {
     </div>
   )
 }
+
+
+
+
+
 
 
 
